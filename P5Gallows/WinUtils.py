@@ -48,12 +48,11 @@ class WindowManager():
                       'searching with a different keyword.')
 
     def get_window_rect(self):
-        """Returns the window's origin (tuple), width and height."""
+        """Returns the window's boundary box."""
         if self.selected_window is None:
             raise NoSelectedWindow('No window has been selected, call '
                                    'find_window first')
-        rect = win32gui.GetWindowRect(self.selected_window)
-        return rect[0], rect[1], (rect[2] - rect[0]), (rect[3] - rect[1])
+        return win32gui.GetWindowRect(self.selected_window)
 
     def show_window(self):
         """Shows the window and brings it to the foreground."""
