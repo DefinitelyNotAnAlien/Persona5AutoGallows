@@ -10,16 +10,8 @@ from PIL import Image
 import sys
 if sys.platform == 'win32':
     from .Win32Controls import press_button
-    try:
-        # For detecting the current location and size of the rpcs3 window
-        from .WinUtils import WindowManager
-        FIND_WIN = True
-    except ImportError:
-        FIND_WIN = False
-        warn.warn('Window detection is disabled! You must set the emulator '
-                  'window\'s coordinates. Also you\'ll need to switch to the '
-                  'emulator window manually.', ImportWarning)
-
+    # For detecting the current location and size of the rpcs3 window
+    from .WinUtils import WindowManager
 else:
     raise NotImplementedError('This script currently only works on Windows.')
 

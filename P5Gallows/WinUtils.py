@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import warnings as warn
-import win32gui
-
+try:
+    import win32gui
+except ImportError:
+    raise ImportError('win32api is required for the script to work, install '
+                      'it with pip install pywin32')
 
 class NoSelectedWindow(Exception):
     pass
