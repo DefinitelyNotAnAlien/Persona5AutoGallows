@@ -1,4 +1,4 @@
-from .AutoGallows import detect_stats auto_gallows
+from .AutoGallows import detect_stats, auto_gallows
 from .WinUtils import WindowManager
 
 

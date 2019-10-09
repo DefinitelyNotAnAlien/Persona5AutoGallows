@@ -96,8 +96,10 @@ def auto_gallows(level_stats):
         level_up = detect_stats(game_screen)
         print(level_up)
         if level_stats == level_up:
+            press_button(CONTROLS['CROSS'])
             break
-        press_button(CONTROLS['CIRCLE'])
+        else:
+            press_button(CONTROLS['CIRCLE'])
 
 
 if __name__ == '__main__':
