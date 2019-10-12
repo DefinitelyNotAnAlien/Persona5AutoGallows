@@ -22,12 +22,13 @@ class WindowManager():
         * find_window: searches all the open windows and searches for one
         with a window title that includes the indicated substring, sets
         selected_window.
-        * get_window_rect: gets the rectangle box for the selected window,
-        returns the following values in 
-            window origin as a tuple (x origin, y origin),
-            window width, window height
+        * get_window_rect: gets the bounding rectangle box for the selected
+        window, returns left, top, right, bottom coordinates.
+        * screenshot: takes a screenshot of the current window, returns a
+        PIL.Image object.
+        * send_keys: Emulates keyboard input for the window.
         * show_window: shows the window and brings it to the foreground (i.e.
-        the front of the screen)
+        the front of the screen).
     """
     selected_window = None
 
@@ -37,13 +38,19 @@ class WindowManager():
         # selected_window can be None is when find_window is called
         if self.selected_window is not None:
             return
-        if substr in win32gui.GetWindowText(win_hndl):
+        elif substr in win32gui.GetWindowText(win_hndl):
             self.selected_window = win_hndl
-            self.window_child = win32gui.GetWindow(win_hndl,
-                                                          win32con.GW_CHILD)
 
     def find_window(self, title_substr):
-        """Search for a window containing a substring in it's title."""
+        """Search for a window containing a substring in it's title.
+
+        Args:
+          title_substr(string): A string that should be contained in the
+          window's title.
+
+        Returns:
+          None
+        """
         self.selected_window = None
         win32gui.EnumWindows(self.__find_window_callback, title_substr)
         # if callback doesn't find the window, selected_window stays as None
@@ -52,13 +59,29 @@ class WindowManager():
                       'searching with a different keyword.')
 
     def get_window_rect(self):
-        """Returns the window's boundary box."""
+        """Returns the window's boundary box.
+
+        Args:
+          None
+        
+        Returns:
+          Window bounding box coordinates(int): Left, Top, Right, Bottom.
+        """
         if self.selected_window is None:
             raise NoSelectedWindow('No window has been selected, call '
                                    'find_window first')
         return win32gui.GetWindowRect(self.selected_window)
 
     def screenshot(self):
+        """Take a screenshot of the window.
+
+        Args:
+          None
+
+        Returns:
+          img(PIL.Image): An Image object containing a screenshot of the
+          selected window.
+        """
         left, top, right, bottom = self.get_window_rect()
         width = right - left
         height = bottom - top
@@ -86,14 +109,24 @@ class WindowManager():
         if result == 1:
             return img
 
-    def send_keys(self, hex_keycode, wait=0.2):
+    def send_keys(self, key_code, wait=0.2):
+        """Emulates input from the keyboard.
+
+        Args:
+          key_code(int/hex): Virtual keycode representing a key
+          wait(float): Time to wait between sending the press input and
+          release input of the key.
+    
+        Returns:
+          None.
+        """
         temp = win32api.PostMessage(self.selected_window,
                                     win32con.WM_SYSKEYDOWN,
-                                    hex_keycode, 0)
+                                    key_code, 0)
         sleep(wait)
         temp = win32api.PostMessage(self.selected_window,
                                     win32con.WM_SYSKEYUP,
-                                    hex_keycode, 0)
+                                    key_code, 0)
 
     def show_window(self):
         """Shows the window and brings it to the foreground."""
