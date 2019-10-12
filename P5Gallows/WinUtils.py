@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import warnings as warn
-try:
-    import win32gui
-except ImportError:
-    raise ImportError('win32api is required for the script to work, install '
-                      'it with pip install pywin32')
+from ctypes import windll
+import win32ui
+import win32gui
+from PIL import Image
 
-class NoSelectedWindow(Exception):
-    pass
+
+class NoSelectedWindow(Exception): pass
 
 
 class WindowManager():
@@ -53,6 +52,34 @@ class WindowManager():
             raise NoSelectedWindow('No window has been selected, call '
                                    'find_window first')
         return win32gui.GetWindowRect(self.selected_window)
+
+    def window_screenshot(self):
+        left, top, right, bottom = self.get_window_rect()
+        width = right - left
+        height = bottom - top
+        hwnd_dc = win32gui.GetWindowDC(self.selected_window)
+        mfc_dc = win32ui.CreateDCFromHandle(hwnd_dc)
+        save_dc = mfc_dc.CreateCompatibleDC()
+
+        save_bitmap = win32ui.CreateBitmap()
+        save_bitmap.CreateCompatibleBitmap(mfc_dc, width, height)
+        save_dc.SelectObject(save_bitmap)
+        result = windll.user32.PrintWindow(self.selected_window,
+                                           save_dc.GetSafeHdc(), 0)
+
+        bmp_info = save_bitmap.GetInfo()
+        bmp_str = save_bitmap.GetBitmapBits(True)
+        img = Image.frombuffer('RGB',
+                               (bmp_info['bmWidth'], bmp_info['bmHeight']),
+                               bmp_str, 'raw', 'BGRX', 0, 1)
+
+        win32gui.DeleteObject(save_bitmap.GetHandle())
+        save_dc.DeleteDC()
+        mfc_dc.DeleteDC()
+        win32gui.ReleaseDC(self.selected_window, hwnd_dc)
+
+        if result == 1:
+            return img
 
     def show_window(self):
         """Shows the window and brings it to the foreground."""
