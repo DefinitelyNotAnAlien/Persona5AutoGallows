@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from time import sleep
 import warnings as warn
 from ctypes import windll
 import win32ui
+import win32api
+import win32con
 import win32gui
 from PIL import Image
 
@@ -36,6 +39,8 @@ class WindowManager():
             return
         if substr in win32gui.GetWindowText(win_hndl):
             self.selected_window = win_hndl
+            self.window_child = win32gui.GetWindow(win_hndl,
+                                                          win32con.GW_CHILD)
 
     def find_window(self, title_substr):
         """Search for a window containing a substring in it's title."""
@@ -53,7 +58,7 @@ class WindowManager():
                                    'find_window first')
         return win32gui.GetWindowRect(self.selected_window)
 
-    def window_screenshot(self):
+    def screenshot(self):
         left, top, right, bottom = self.get_window_rect()
         width = right - left
         height = bottom - top
@@ -81,7 +86,17 @@ class WindowManager():
         if result == 1:
             return img
 
+    def send_keys(self, hex_keycode, wait=0.2):
+        temp = win32api.PostMessage(self.selected_window,
+                                    win32con.WM_SYSKEYDOWN,
+                                    hex_keycode, 0)
+        sleep(wait)
+        temp = win32api.PostMessage(self.selected_window,
+                                    win32con.WM_SYSKEYUP,
+                                    hex_keycode, 0)
+
     def show_window(self):
         """Shows the window and brings it to the foreground."""
         win32gui.ShowWindow(self.selected_window, 5)
         win32gui.SetForegroundWindow(self.selected_window)
+
